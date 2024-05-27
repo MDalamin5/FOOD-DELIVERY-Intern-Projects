@@ -1,0 +1,44 @@
+/* static/css/styles.css */
+
+.carousel-inner img {
+    height: 30vh; /* Set the height to 50% of the viewport height */
+    object-fit: cover; /* Ensure the image covers the entire carousel area */
+}
+
+/* Other existing CSS */
+.jumbotron {
+    background: #f8f9fa;
+    padding: 2rem 1rem;
+}
+
+.card {
+    margin-bottom: 1rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.card .card-body {
+    text-align: center;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+.card-text {
+    font-size: 1rem;
+    color: #6c757d;
+}
+
+footer {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
