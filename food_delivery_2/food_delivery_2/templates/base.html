@@ -15,7 +15,9 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'meal_off' %}">Meal Off</a>
                     </li>
-                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'subscribe' plan_id=1 %}">Subscribe Plan 1</a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'consume_meal' 'lunch' %}">Order Lunch</a>
                     </li>
@@ -39,10 +41,9 @@
             </ul>
         </div>
     </nav>
-    <div class="container mt-5">
-        <h1>Welcome to Food Delivery System</h1>
-        
-    </div>
+    {% block body %}
+
+    {% endblock body %}
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
