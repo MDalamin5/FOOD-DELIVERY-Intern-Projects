@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Statistics</title>
+    <!-- Add any necessary CSS or meta tags here -->
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Order Statistics for {{ stats.date }}</h2>
+        <div class="row">
+            <div class="col-md-6">
+                <h4>Lunch</h4>
+                <p>Basic: {{ stats.lunch_basic }}</p>
+                <p>Premium: {{ stats.lunch_premium }}</p>
+            </div>
+            <div class="col-md-6">
+                <h4>Dinner</h4>
+                <p>Basic: {{ stats.dinner_basic }}</p>
+                <p>Premium: {{ stats.dinner_premium }}</p>
+            </div>
+        </div>
+    </div>
+    <!-- Add any necessary JavaScript or other HTML elements here -->
+</body>
+</html>
