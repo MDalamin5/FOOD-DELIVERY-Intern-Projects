@@ -1,0 +1,12 @@
+{% extends 'meals/base.html' %}
+
+{% block title %}Already Ordered{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="alert alert-warning text-center">
+        You have already ordered {{ meal_type }} for today.
+    </div>
+    <a href="{% url 'meal_order_info' %}" class="btn btn-primary">View Order Information</a>
+</div>
+{% endblock %}

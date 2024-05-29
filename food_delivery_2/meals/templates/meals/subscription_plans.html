@@ -19,9 +19,9 @@
                 <div class="card-body">
                     <h5 class="card-title">{{ plan.name }}</h5>
                     <p class="card-text">Duration: {{ plan.get_duration_display }}</p>
-                    <p class="card-text">Price: ${{ plan.price }}</p>
-                    <p class="card-text">Lunch Price: ${{ plan.lunch_price }}</p>
-                    <p class="card-text">Dinner Price: ${{ plan.dinner_price }}</p>
+                    <p class="card-text">Price: ৳{{ plan.price }}</p>
+                    <p class="card-text">Lunch Price: ৳{{ plan.lunch_price }}</p>
+                    <p class="card-text">Dinner Price: ৳{{ plan.dinner_price }}</p>
                     <a href="{% url 'subscribe' plan.id %}" class="btn btn-primary">Subscribe</a>
                 </div>
             </div>

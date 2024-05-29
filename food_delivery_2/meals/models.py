@@ -33,13 +33,18 @@ class Customer(models.Model):
 
 
 class MealOff(models.Model):
+    MEAL_CHOICES = [
+        ('lunch', 'Lunch'),
+        ('dinner', 'Dinner'),
+    ]
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     date = models.DateField()
+    meal_type = models.CharField(max_length=10, choices=MEAL_CHOICES, null=True, blank=True)
     lunch_off = models.BooleanField(default=False)
     dinner_off = models.BooleanField(default=False)
 
     def __str__(self):
-        return f'{self.customer.user.username} - {self.date}'
+        return f"{self.customer.user.username} - {self.date} - {self.meal_type}"
 
 
 class OrderStatistics(models.Model):

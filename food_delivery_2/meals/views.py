@@ -110,24 +110,21 @@ def meal_off_success(request):
 from django.contrib.auth.models import User
 from .models import Customer, SubscriptionPlan
 
+from decimal import Decimal
 def convert_to_customer(user):
     # Assign a default subscription plan if needed
     default_plan = SubscriptionPlan.objects.first()
     
     # Create a new customer instance for the user
-    customer = Customer.objects.create(
+    return Customer.objects.create(
         user=user,
-        category='Basic',  # Or set this dynamically based on user input or business logic
-        subscription_plan=default_plan,  # You may want to set this to None initially
-        balance=500.00  # Initial balance
+        category='Basic',  # or any default category you want to assign
+        balance=Decimal('500.00')  # initial balance
     )
-    return customer
 
 
 
-from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from .models import Customer, SubscriptionPlan
+
 
 @login_required
 def subscribe(request, plan_id):
@@ -141,9 +138,12 @@ def subscribe(request, plan_id):
         # If not, convert the user to a customer
         customer = convert_to_customer(user)
     
+    # Ensure that the plan price is a Decimal
+    plan_price = Decimal(plan.price)
+    
     # Update the customer's subscription plan and balance
     customer.subscription_plan = plan
-    customer.balance -= plan.price
+    customer.balance -= plan_price
     customer.save()
     
     return render(request, 'meals/subscribe_success.html', {'plan': plan})
@@ -259,3 +259,4 @@ def meal_order_info(request):
     meal_offs = MealOff.objects.filter(customer=customer)
 
     return render(request, 'meals/meal_order_info.html', {'meal_offs': meal_offs})
+
