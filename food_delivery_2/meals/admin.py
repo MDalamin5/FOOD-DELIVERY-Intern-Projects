@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Customer, SubscriptionPlan, MealOff, OrderStatistics
+from .models import Customer, SubscriptionPlan, MealOff, OrderStatistics, SubscriptionHistory
 
 
 class OrderStatisticsAdmin(admin.ModelAdmin):
@@ -13,3 +13,4 @@ admin.site.register(OrderStatistics, OrderStatisticsAdmin)
 admin.site.register(Customer)
 admin.site.register(SubscriptionPlan)
 admin.site.register(MealOff)
+admin.site.register(SubscriptionHistory)

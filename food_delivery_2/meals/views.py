@@ -12,6 +12,7 @@ from django.shortcuts import render
 from .models import OrderStatistics
 from django.db.models import Count
 from django.utils import timezone
+from .utils import send_subscription_confirmation, send_meal_off_confirmation
 
 
 from django.shortcuts import render
@@ -72,16 +73,59 @@ def user_logout(request):
     logout(request)
     return redirect('home')
 
+# @login_required
+# def meal_off(request):
+#     now = timezone.localtime(timezone.now())
+#     current_time = now.time()
+
+#     if request.method == 'POST':
+#         form = MealOffForm(request.POST)
+#         if form.is_valid():
+#             meal_off = form.save(commit=False)
+#             meal_off.customer = Customer.objects.get(user=request.user)
+
+#             if meal_off.lunch_off and meal_off.dinner_off:
+#                 if not (time(0, 0) <= current_time <= time(9, 0)):
+#                     return render(request, 'meals/meal_off.html', {'form': form, 'error': 'Both meals can only be turned off between 12 AM and 9 AM.'})
+#             elif meal_off.lunch_off:
+#                 if not (time(0, 0) <= current_time <= time(9, 0)):
+#                     return render(request, 'meals/meal_off.html', {'form': form, 'error': 'Lunch can only be turned off between 12 AM and 9 AM.'})
+#             elif meal_off.dinner_off:
+#                 if not (time(0, 0) <= current_time <= time(15, 0)):
+#                     return render(request, 'meals/meal_off.html', {'form': form, 'error': 'Dinner can only be turned off between 12 AM and 3 PM.'})
+
+#             meal_off.save()
+#             return redirect('meal_off_success')
+#     else:
+#         form = MealOffForm()
+
+#     return render(request, 'meals/meal_off.html', {'form': form})
+
+
+@login_required
+def meal_off_success(request):
+    return render(request, 'meals/meal_off_success.html')
+
+
 @login_required
 def meal_off(request):
     now = timezone.localtime(timezone.now())
     current_time = now.time()
+    today = now.date()
 
     if request.method == 'POST':
         form = MealOffForm(request.POST)
         if form.is_valid():
             meal_off = form.save(commit=False)
-            meal_off.customer = Customer.objects.get(user=request.user)
+            customer = Customer.objects.get(user=request.user)
+            meal_off.customer = customer
+
+            # Check if the meal is already turned off for today
+            if MealOff.objects.filter(customer=customer, date=today).exists():
+                return render(request, 'meals/meal_off.html', {
+                    'form': form,
+                    'error': 'You have already turned off meals for today.'
+                })
 
             if meal_off.lunch_off and meal_off.dinner_off:
                 if not (time(0, 0) <= current_time <= time(9, 0)):
@@ -93,17 +137,23 @@ def meal_off(request):
                 if not (time(0, 0) <= current_time <= time(15, 0)):
                     return render(request, 'meals/meal_off.html', {'form': form, 'error': 'Dinner can only be turned off between 12 AM and 3 PM.'})
 
+            meal_off.date = today  # Set the date to today
             meal_off.save()
+            
+            # Send confirmation email
+            meal_types = []
+            if meal_off.lunch_off:
+                meal_types.append('lunch')
+            if meal_off.dinner_off:
+                meal_types.append('dinner')
+            for meal_type in meal_types:
+                send_meal_off_confirmation(request.user, meal_type)
+
             return redirect('meal_off_success')
     else:
         form = MealOffForm()
 
     return render(request, 'meals/meal_off.html', {'form': form})
-
-
-@login_required
-def meal_off_success(request):
-    return render(request, 'meals/meal_off_success.html')
 
 
 
@@ -126,25 +176,63 @@ def convert_to_customer(user):
 
 
 
+# @login_required
+# def subscribe(request, plan_id):
+#     user = request.user
+#     plan = get_object_or_404(SubscriptionPlan, id=plan_id)
+    
+#     try:
+#         # Check if the user is a customer
+#         customer = Customer.objects.get(user=user)
+#     except Customer.DoesNotExist:
+#         # If not, convert the user to a customer
+#         customer = convert_to_customer(user)
+    
+#     # Ensure that the plan price is a Decimal
+#     plan_price = Decimal(plan.price)
+    
+#     # Update the customer's subscription plan and balance
+#     customer.subscription_plan = plan
+#     customer.balance -= plan_price
+#     customer.save()
+    
+#     return render(request, 'meals/subscribe_success.html', {'plan': plan})
+
+
+
+
+
 @login_required
 def subscribe(request, plan_id):
     user = request.user
     plan = get_object_or_404(SubscriptionPlan, id=plan_id)
     
     try:
-        # Check if the user is a customer
         customer = Customer.objects.get(user=user)
     except Customer.DoesNotExist:
-        # If not, convert the user to a customer
         customer = convert_to_customer(user)
     
-    # Ensure that the plan price is a Decimal
+    if customer.subscription_plan:
+        current_plan = customer.subscription_plan
+        return render(request, 'meals/subscribe.html', {
+            'plan': plan,
+            'current_plan': current_plan,
+            'message': 'You already have a subscription plan. You cannot change it unless you pay 50% of the current plan\'s price.'
+        })
+    
     plan_price = Decimal(plan.price)
     
-    # Update the customer's subscription plan and balance
+    if customer.balance < plan_price:
+        return render(request, 'meals/subscribe.html', {
+            'plan': plan,
+            'message': 'Insufficient balance to subscribe to this plan.'
+        })
+    
     customer.subscription_plan = plan
     customer.balance -= plan_price
     customer.save()
+    
+    send_subscription_confirmation(user, plan)  # Send subscription confirmation email
     
     return render(request, 'meals/subscribe_success.html', {'plan': plan})
 
