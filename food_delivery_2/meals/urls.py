@@ -7,8 +7,6 @@ from .views import home, user_logout, meal_order_info, subscription_plans, signu
 urlpatterns = [
     path('', home, name='home'),
     path('admin/order-statistics/', order_statistics_view, name='order_statistics'),
-    path('meal_off/', meal_off, name='meal_off'),
-    path('meal_off/success/', meal_off_success, name='meal_off_success'),
     path('signup/', signup, name='signup'),
     path('login/', user_login, name='login'),
     path('logout/', user_logout, name='logout'),
