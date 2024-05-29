@@ -1,0 +1,32 @@
+{% extends 'meals/base.html' %}
+
+{% block title %}Subscription Plans{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center">Subscription Plans</h2>
+    
+    {% if current_plan %}
+    <div class="alert alert-info text-center">
+        You are currently subscribed to the {{ current_plan.name }} plan.
+    </div>
+    {% endif %}
+    
+    <div class="row">
+        {% for plan in plans %}
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">{{ plan.name }}</h5>
+                    <p class="card-text">Duration: {{ plan.get_duration_display }}</p>
+                    <p class="card-text">Price: ${{ plan.price }}</p>
+                    <p class="card-text">Lunch Price: ${{ plan.lunch_price }}</p>
+                    <p class="card-text">Dinner Price: ${{ plan.dinner_price }}</p>
+                    <a href="{% url 'subscribe' plan.id %}" class="btn btn-primary">Subscribe</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

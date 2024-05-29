@@ -16,7 +16,30 @@ from django.utils import timezone
 
 from django.shortcuts import render
 
+from django.shortcuts import render
+from .models import SubscriptionPlan
+
+@login_required
+def subscription_plans(request):
+    plans = SubscriptionPlan.objects.all()
+    user = request.user
+
+    # Check if the user is authenticated and has a subscription plan
+    try:
+        customer = Customer.objects.get(user=user)
+        current_plan = customer.subscription_plan
+    except Customer.DoesNotExist:
+        current_plan = None
+
+    return render(request, 'meals/subscription_plans.html', {'plans': plans, 'current_plan': current_plan})
+
+
 def home(request):
+    
+    # plans = SubscriptionPlan.objects.all()
+    # for plan in plans:
+    #     print(plan.id, plan.name, plan.price)
+
     return render(request, 'meals/home.html')
 
 
@@ -26,7 +49,7 @@ def signup(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect('home')  # Redirect to the login page after sign up
+            return redirect('subscription_plans')  # Redirect to the login page after sign up
     else:
         form = SignUpForm()
     return render(request, 'meals/signup.html', {'form': form})
@@ -84,17 +107,46 @@ def meal_off_success(request):
 
 
 
+from django.contrib.auth.models import User
+from .models import Customer, SubscriptionPlan
+
+def convert_to_customer(user):
+    # Assign a default subscription plan if needed
+    default_plan = SubscriptionPlan.objects.first()
+    
+    # Create a new customer instance for the user
+    customer = Customer.objects.create(
+        user=user,
+        category='Basic',  # Or set this dynamically based on user input or business logic
+        subscription_plan=default_plan,  # You may want to set this to None initially
+        balance=500.00  # Initial balance
+    )
+    return customer
+
+
+
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Customer, SubscriptionPlan
+
 @login_required
 def subscribe(request, plan_id):
+    user = request.user
     plan = get_object_or_404(SubscriptionPlan, id=plan_id)
-    customer = Customer.objects.get(user=request.user)
     
+    try:
+        # Check if the user is a customer
+        customer = Customer.objects.get(user=user)
+    except Customer.DoesNotExist:
+        # If not, convert the user to a customer
+        customer = convert_to_customer(user)
+    
+    # Update the customer's subscription plan and balance
     customer.subscription_plan = plan
     customer.balance -= plan.price
     customer.save()
     
     return render(request, 'meals/subscribe_success.html', {'plan': plan})
-
 
 
 
@@ -196,3 +248,14 @@ def order_statistics_view(request):
     
     return render(request, 'meals/order_statistics.html', context)
 
+
+
+
+
+@login_required
+def meal_order_info(request):
+    user = request.user
+    customer = Customer.objects.get(user=user)
+    meal_offs = MealOff.objects.filter(customer=customer)
+
+    return render(request, 'meals/meal_order_info.html', {'meal_offs': meal_offs})

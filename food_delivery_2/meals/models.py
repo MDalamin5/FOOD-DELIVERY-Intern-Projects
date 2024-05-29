@@ -25,11 +25,12 @@ class Customer(models.Model):
     ]
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
-    subscription_plan = models.ForeignKey(SubscriptionPlan, on_delete=models.CASCADE)
+    subscription_plan = models.ForeignKey(SubscriptionPlan, on_delete=models.SET_NULL, null=True, blank=True)
     balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     def __str__(self):
         return self.user.username
+
 
 class MealOff(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)

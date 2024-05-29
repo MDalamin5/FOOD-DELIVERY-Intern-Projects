@@ -1,0 +1,28 @@
+{% extends 'meals/base.html' %}
+
+{% block title %}Meal Order Info{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center">Your Meal Orders</h2>
+    
+    <table class="table table-bordered mt-4">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Lunch</th>
+                <th>Dinner</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for meal_off in meal_offs %}
+            <tr>
+                <td>{{ meal_off.date }}</td>
+                <td>{{ meal_off.lunch_off }}</td>
+                <td>{{ meal_off.dinner_off }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

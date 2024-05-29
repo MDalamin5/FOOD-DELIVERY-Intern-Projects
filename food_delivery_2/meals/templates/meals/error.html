@@ -1,13 +1,12 @@
-{% load static %}  
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Meal Service{% endblock %}</title>
+    <title>Error - Meal Service</title>
     <!-- Bootstrap CSS CDN -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
@@ -22,8 +21,6 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ml-auto">
                     {% if user.is_authenticated %}
-                        <li class="nav-item"><a class="nav-link" href="{% url 'subscription_plans' %}">Subscription Plans</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{% url 'meal_order_info' %}">meal_order_info</a></li>
                         <li class="nav-item"><a class="nav-link" href="{% url 'meal_off' %}">Turn Off Meal</a></li>
                         <li class="nav-item"><a class="nav-link" href="{% url 'consume_meal' 'lunch' %}">Consume Lunch</a></li>
                         <li class="nav-item"><a class="nav-link" href="{% url 'consume_meal' 'dinner' %}">Consume Dinner</a></li>
@@ -37,16 +34,25 @@
         </nav>
     </header>
     <main class="container mt-5">
-        {% block content %}
-        {% endblock %}
+        <div class="alert alert-danger" role="alert">
+            <h4 class="alert-heading">An Error Occurred</h4>
+            <p>{% if message %}{{ message }}{% else %}Sorry, something went wrong. Please try again later.{% endif %}</p>
+        </div>
     </main>
-    
+    <!-- Footer -->
+    <footer class="footer mt-auto py-3 bg-light">
+        <div class="container text-center">
+            <p class="mb-0">&copy; 2024 Meal Service. All rights reserved.</p>
+            <div class="social-icons">
+                <a href="#"><i class="fab fa-facebook-f mx-2"></i></a>
+                <a href="#"><i class="fab fa-twitter mx-2"></i></a>
+                <a href="#"><i class="fab fa-instagram mx-2"></i></a>
+            </div>
+        </div>
+    </footer>
     <!-- Bootstrap JS, Popper.js, and jQuery -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
