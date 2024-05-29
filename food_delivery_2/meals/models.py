@@ -56,3 +56,13 @@ class OrderStatistics(models.Model):
 
     def __str__(self):
         return str(self.date)
+    
+    
+    
+# additional Features
+
+class SubscriptionHistory(models.Model):
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    subscription_plan = models.ForeignKey(SubscriptionPlan, on_delete=models.CASCADE)
+    start_date = models.DateTimeField(auto_now_add=True)
+    end_date = models.DateTimeField(null=True, blank=True)
