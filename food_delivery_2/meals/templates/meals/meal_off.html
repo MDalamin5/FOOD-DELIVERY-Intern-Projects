@@ -11,30 +11,16 @@
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav ml-auto">
                 {% if user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'meal_off' %}">Meal Off</a>
-                    </li>
-                    
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'consume_meal' 'lunch' %}">Order Lunch</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'consume_meal' 'dinner' %}">Order Dinner</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'consume_meal' 'both' %}">Order Both</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'logout' %}">Logout</a>
-                    </li>
-                {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'login' %}">Login</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'signup' %}">Sign Up</a>
-                    </li>
-                {% endif %}
+                <li class="nav-item"><a class="nav-link" href="{% url 'subscription_plans' %}">Subscription Plans</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'meal_order_info' %}">Meal off info</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'meal_off' %}">Turn off Meal</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'consume_meal' 'lunch' %}">Consume Lunch</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'consume_meal' 'dinner' %}">Consume Dinner</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">Logout</a></li>
+            {% else %}
+                <li class="nav-item"><a class="nav-link" href="{% url 'signup' %}">Sign Up</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
+            {% endif %}
             </ul>
         </div>
     </nav>
