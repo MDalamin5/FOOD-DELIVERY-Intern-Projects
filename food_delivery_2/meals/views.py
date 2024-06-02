@@ -7,18 +7,14 @@ from datetime import time
 from .forms import SignUpForm, MealOffForm
 from .models import MealOff, Customer, SubscriptionPlan
 from django.contrib.auth import logout
-
 from django.shortcuts import render
 from .models import OrderStatistics
-from django.db.models import Count
-from django.utils import timezone
 from .utils import send_subscription_confirmation, send_meal_off_confirmation
 
 
-from django.shortcuts import render
 
-from django.shortcuts import render
-from .models import SubscriptionPlan
+
+
 
 @login_required
 def subscription_plans(request):
@@ -73,33 +69,6 @@ def user_logout(request):
     logout(request)
     return redirect('home')
 
-# @login_required
-# def meal_off(request):
-#     now = timezone.localtime(timezone.now())
-#     current_time = now.time()
-
-#     if request.method == 'POST':
-#         form = MealOffForm(request.POST)
-#         if form.is_valid():
-#             meal_off = form.save(commit=False)
-#             meal_off.customer = Customer.objects.get(user=request.user)
-
-#             if meal_off.lunch_off and meal_off.dinner_off:
-#                 if not (time(0, 0) <= current_time <= time(9, 0)):
-#                     return render(request, 'meals/meal_off.html', {'form': form, 'error': 'Both meals can only be turned off between 12 AM and 9 AM.'})
-#             elif meal_off.lunch_off:
-#                 if not (time(0, 0) <= current_time <= time(9, 0)):
-#                     return render(request, 'meals/meal_off.html', {'form': form, 'error': 'Lunch can only be turned off between 12 AM and 9 AM.'})
-#             elif meal_off.dinner_off:
-#                 if not (time(0, 0) <= current_time <= time(15, 0)):
-#                     return render(request, 'meals/meal_off.html', {'form': form, 'error': 'Dinner can only be turned off between 12 AM and 3 PM.'})
-
-#             meal_off.save()
-#             return redirect('meal_off_success')
-#     else:
-#         form = MealOffForm()
-
-#     return render(request, 'meals/meal_off.html', {'form': form})
 
 
 @login_required
@@ -138,6 +107,10 @@ def meal_off(request):
                     return render(request, 'meals/meal_off.html', {'form': form, 'error': 'Dinner can only be turned off between 12 AM and 3 PM.'})
 
             meal_off.date = today  # Set the date to today
+            if meal_off.lunch_off:
+                meal_off.meal_type = 'lunch'
+            elif meal_off.dinner_off:
+                meal_off.meal_type = 'dinner'
             meal_off.save()
             
             # Send confirmation email
@@ -157,9 +130,6 @@ def meal_off(request):
 
 
 
-from django.contrib.auth.models import User
-from .models import Customer, SubscriptionPlan
-
 from decimal import Decimal
 def convert_to_customer(user):
     # Assign a default subscription plan if needed
@@ -176,32 +146,6 @@ def convert_to_customer(user):
 
 
 
-# @login_required
-# def subscribe(request, plan_id):
-#     user = request.user
-#     plan = get_object_or_404(SubscriptionPlan, id=plan_id)
-    
-#     try:
-#         # Check if the user is a customer
-#         customer = Customer.objects.get(user=user)
-#     except Customer.DoesNotExist:
-#         # If not, convert the user to a customer
-#         customer = convert_to_customer(user)
-    
-#     # Ensure that the plan price is a Decimal
-#     plan_price = Decimal(plan.price)
-    
-#     # Update the customer's subscription plan and balance
-#     customer.subscription_plan = plan
-#     customer.balance -= plan_price
-#     customer.save()
-    
-#     return render(request, 'meals/subscribe_success.html', {'plan': plan})
-
-
-
-
-
 @login_required
 def subscribe(request, plan_id):
     user = request.user
@@ -212,29 +156,88 @@ def subscribe(request, plan_id):
     except Customer.DoesNotExist:
         customer = convert_to_customer(user)
     
+    # Check if the customer already has a subscription plan
     if customer.subscription_plan:
         current_plan = customer.subscription_plan
-        return render(request, 'meals/subscribe.html', {
-            'plan': plan,
-            'current_plan': current_plan,
-            'message': 'You already have a subscription plan. You cannot change it unless you pay 50% of the current plan\'s price.'
-        })
+        current_plan_price = Decimal(current_plan.price)
+        new_plan_price = Decimal(plan.price)
+        
+        # Calculate the price difference
+        price_difference = new_plan_price - current_plan_price
+        
+        if price_difference > 0:
+            # Upgrading to a more expensive plan
+            if customer.balance < price_difference:
+                return render(request, 'meals/subscribe.html', {
+                    'plan': plan,
+                    'current_plan': current_plan,
+                    'message': 'Insufficient balance to upgrade to the new plan.'
+                })
+            else:
+                customer.balance -= price_difference
+        else:
+            # Downgrading to a cheaper plan or same plan
+            customer.balance += abs(price_difference)
+        
+        customer.subscription_plan = plan
+        customer.save()
+        send_subscription_confirmation(user, plan)  # Send subscription confirmation email
+        
+        return render(request, 'meals/subscribe_success.html', {'plan': plan})
+    else:
+        plan_price = Decimal(plan.price)
+        
+        if customer.balance < plan_price:
+            return render(request, 'meals/subscribe.html', {
+                'plan': plan,
+                'message': 'Insufficient balance to subscribe to this plan.'
+            })
+        
+        customer.subscription_plan = plan
+        customer.balance -= plan_price
+        customer.save()
+        
+        send_subscription_confirmation(user, plan)  # Send subscription confirmation email
+        
+        return render(request, 'meals/subscribe_success.html', {'plan': plan})
     
-    plan_price = Decimal(plan.price)
     
-    if customer.balance < plan_price:
-        return render(request, 'meals/subscribe.html', {
-            'plan': plan,
-            'message': 'Insufficient balance to subscribe to this plan.'
-        })
+
+# @login_required
+# def subscribe(request, plan_id):
+#     user = request.user
+#     print(plan, 'alskdjfl')
+#     plan = get_object_or_404(SubscriptionPlan, id=plan_id)
+#     print(plan, 'alskdjfl')
     
-    customer.subscription_plan = plan
-    customer.balance -= plan_price
-    customer.save()
+#     try:
+#         # Check if the user is a customer
+#         customer = Customer.objects.get(user=user)
+#     except Customer.DoesNotExist:
+#         # If not, convert the user to a customer
+#         customer = convert_to_customer(user)
     
-    send_subscription_confirmation(user, plan)  # Send subscription confirmation email
+#     # Check if the customer is already subscribed to a plan
+#     if customer.subscription_plan:
+#         current_plan = customer.subscription_plan
+#         return render(request, 'meals/subscribe.html', {
+#             'plan': plan,
+#             'current_plan': current_plan,
+#             'message': 'You are currently subscribed to the "{}" plan.'.format(current_plan.name)
+#         })
     
-    return render(request, 'meals/subscribe_success.html', {'plan': plan})
+#     # Ensure that the plan price is a Decimal
+#     plan_price = Decimal(plan.price)
+    
+#     # Update the customer's subscription plan and balance
+#     customer.subscription_plan = plan
+#     customer.balance -= plan_price
+#     customer.save()
+    
+#     send_subscription_confirmation(user, plan)  # Send subscription confirmation email
+    
+#     return render(request, 'meals/subscribe_success.html', {'plan': plan})
+
 
 
 
@@ -286,16 +289,6 @@ def consume_meal(request, meal_type):
         return redirect('consume_meal_success')
     else:
         return render(request, 'meals/insufficient_balance.html')
-
-
-
-
-
-
-
-
-
-
 
 
 
