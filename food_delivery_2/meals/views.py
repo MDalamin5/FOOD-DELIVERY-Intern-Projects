@@ -81,6 +81,7 @@ def meal_off(request):
     now = timezone.localtime(timezone.now())
     current_time = now.time()
     today = now.date()
+    
 
     if request.method == 'POST':
         form = MealOffForm(request.POST)

@@ -44,7 +44,7 @@ class MealOff(models.Model):
     dinner_off = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.customer.user.username} - {self.date}"
+        return f"{self.customer.user.username} - {self.date} - {self.meal_type}"
 
 
 class OrderStatistics(models.Model):
